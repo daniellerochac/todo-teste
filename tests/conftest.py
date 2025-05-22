@@ -1,15 +1,13 @@
-from contextlib import contextmanager
-from datetime import datetime
-
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from todo_teste.app import app
 from todo_teste.database import get_session
-from todo_teste.models import table_registry
+from todo_teste.models import User, table_registry
+from todo_teste.security import get_password_hash
 
 
 @pytest.fixture
@@ -39,24 +37,30 @@ def session():
     table_registry.metadata.drop_all(engine)
 
 
-@contextmanager
-def _mock_db_time(*, model, time=datetime(2024, 1, 1)):
-    def fake_time_handler(mapper, connection, target):
-        if hasattr(target, 'created_at'):
-            target.created_at = time
-        if hasattr(target, 'updated_at'):
-            target.updated_at = time
-        if hasattr(target, 'done_at'):
-            target.done_at = time
+@pytest.fixture
+def user(session):
+    pwd = 'testtest'
 
-    event.listen(model, 'before_insert', fake_time_handler)
-    event.listen(model, 'before_update', fake_time_handler)
+    user = User(
+        username='Teste',
+        email='test@test.com',
+        password=get_password_hash(pwd),
+    )
 
-    yield time
+    session.add(user)
+    session.commit()
+    session.refresh(user)
 
-    event.remove(model, 'before_insert', fake_time_handler)
-    event.listen(model, 'before_update', fake_time_handler)
+    user.clean_password = pwd
 
-    @pytest.fixture
-    def mock_db_time():
-        return _mock_db_time
+    return user
+
+
+@pytest.fixture
+def token(client, user):
+    response = client.post(
+        '/auth/token',
+        data={'username': user.email, 'password': user.clean_password},
+    )
+
+    return response.json()['access_token']

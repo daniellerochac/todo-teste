@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 
-from todo_teste.routers import users
+from todo_teste.routers import auth, users
 
 app = FastAPI()
 
 app.include_router(users.router)
+app.include_router(auth.router)
