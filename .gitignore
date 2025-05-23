@@ -4,9 +4,6 @@
 # Variáveis de ambiente
 .env
 
-# Banco de dados SQLite
-*.db
-
 # Cache Python
 __pycache__/
 *.py[cod]
