@@ -1,0 +1,26 @@
+# Ambiente virtual
+.venv/
+
+# Variáveis de ambiente
+.env
+
+# Banco de dados SQLite
+*.db
+
+# Cache Python
+__pycache__/
+*.py[cod]
+
+# Arquivos de cobertura de testes
+.coverage
+htmlcov/
+
+# Configurações de IDE
+.idea/
+.vscode/
+
+# Arquivos de log
+*.log
+
+# Arquivos de migração (se quiser ignorar, dependendo do caso)
+migrations/__pycache__/
